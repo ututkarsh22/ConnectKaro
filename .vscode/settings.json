@@ -1,0 +1,8 @@
+{
+    "launch": {
+        
+
+        "editor.autoClosingBrackets":false,
+        "editor.suggestionOnTriggerCharacters":false,
+    }
+}
