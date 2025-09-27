@@ -26,20 +26,20 @@ if(isLoading) return <PageLoader/>;
 
 
   return (
-    <div className=' h-screen' data-theme = {theme}>
+    <div className=' h-full' data-theme = {theme}>
     <Routes>
       <Route path='/' element= {isAuthenticated && isOnBoarded ? (
         <Layout showSidebar={true}>
-        <Homepage/>
+        <Homepage currentUserId={authUser._id}/>
         </Layout>
         ) 
         : (<Navigate to ={!isAuthenticated ? "/login" : "/onboarding"}/>)}/>
       <Route path='/login' element = {!isAuthenticated ? <Login/> : <Navigate to ={isOnBoarded ? "/":"/onboarding"}/>}/>
       <Route path='/signup' element = {!isAuthenticated ? <Signup/> : <Navigate to = "/onboarding"/>}/>
       <Route path='/onBoarding' element = {<OnBoarding/>}/>
-      <Route path='/notifications' element = {isAuthenticated ? <Notifications/> : <Navigate to ="/login"/>}/>
-      <Route path='/chat' element = {isAuthenticated ? <ChatPage/>: <Navigate to ="/login"/>}/>
-      <Route path='/call' element = {isAuthenticated ? <CallPage/>: <Navigate to ="/login"/>}/>
+      <Route path='/notifications' element = {isAuthenticated && isOnBoarded ? (<Layout showSidebar={true}><Notifications/></Layout>) : (<Navigate to ={!isAuthenticated ? "/login" : "/onboarding"}/>)}/>
+      <Route path='/chat/:id' element = {isAuthenticated && isOnBoarded ? (<Layout showSidebar={false}><ChatPage/></Layout>) : (<Navigate to ={!isAuthenticated ? "/login" : "/onboarding"}/>)}/>
+      <Route path='/call/:id' element = {isAuthenticated && isOnBoarded ? <CallPage/> : (<Navigate to ={!isAuthenticated ? "/login" : "/onboarding"}/>)}/>
     </Routes>
     <Toaster/>
     </div>

@@ -12,7 +12,7 @@
      retry:false
  })
 
-  return {isLoadin : authUser.isLoading, authUser : authUser.data?.user};
+  return {isLoading : authUser.isLoading, authUser : authUser.data?.user};
  }
  
  export default useAuthUser

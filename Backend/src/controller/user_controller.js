@@ -11,7 +11,7 @@ export const getRecommendedUsers = async (req,res)=>{
         const recommendedUsers = await User.find({
             $and : [
                 {_id : {$ne : currentUserId}}, //current user ni dikhayega list me
-                {id : {$nin : currentUser.friends}}, //current user ke friend bhi ni dikhayega
+                {_id : {$nin : currentUser.friends}}, //current user ke friend bhi ni dikhayega
                 {isOnBoarded:true} //kvl onboarded logo ko dikhayega
 
             ]
@@ -28,7 +28,7 @@ export const getMyFriends = async (req,res) =>{
 
         try {
 
-            const user = await User.findById(req.user.id).select("friends").populate("friends","fullname profilePic,nativeLanguage,learningLanguage");//populate will giv these things fullname profilpic etc if populate is not there then it only give id
+            const user = await User.findById(req.user._id).select("friends").populate("friends","fullname profilePic nativeLanguage learningLanguage");//populate will giv these things fullname profilpic etc if populate is not there then it only give id
 
             res.status(201).json(user.friends);
         } catch (error) {
@@ -70,7 +70,7 @@ export const sendFriendRequest = async(req,res)=>{
         });
 
         if(reqExisted)
-            return res.status(400).json({message: "Friend request already there between you and user"});
+            return res.status(400).json({message: `Friend request already there between you and ${recipient.fullname}`});
 
         const sendFriendReq = await FriendRequest.create({
             sender:myId,
@@ -91,13 +91,13 @@ export const acceptFriendRequest = async (req,res)=>{
 
         const {id: requestedId} = req.params;
 
-        const friendRequest = await FriendRequest.findById({requestedId});
+        const friendRequest = await FriendRequest.findById(requestedId);
 
         if(!friendRequest)
             return res.status(401).json({message: "Friend request Not Found"});
 
         //verify if the current user is recipient
-        if(friendRequest.recipient.toString() !== req.user.id)
+        if(friendRequest.recipient.toString() !== req.user._id.toString())
         {
             return res.status(401).json({message:"You are not authorised to accept this request"});
         }
@@ -133,13 +133,13 @@ export const getFriendRequest = async (req,res) =>{
     try {
         
         const incomingReq = await FriendRequest.find({
-            recipient : req.user.id,
+            recipient : req.user._id,
             status: "pending",
 
-        }).populate("sender","fullname,profilePic,nativeLanguage");
+        }).populate("sender","fullname profilePic nativeLanguage");
 
         const acceptedRequest = await FriendRequest.find({
-            sender : req.user.id,
+            sender : req.user._id,
             status: "pending",
 
         }).populate("sender","fullname profilePic");
@@ -156,7 +156,7 @@ export const getOutgoingFriendReq = async (req,res) => {
 
     try {
         const outgoingFriend = await FriendRequest.find({
-            sender : req.user.id,
+            sender : req.user._id,
             status : "pending",
 
         }).populate("recipient","fullname profilePic  nativeLanguage learningLanguage location");

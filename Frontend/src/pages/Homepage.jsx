@@ -1,38 +1,42 @@
-import {  useMutation, useQueryClient,useQuery } from '@tanstack/react-query'
-import React, { useEffect, useState} from 'react'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
 import { MapPinIcon, UserPlusIcon, User2Icon, CheckCircleIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+
 import NoFriends from '../components/NoFriends';
 import FriendCard from '../components/FriendCard';
 import getLanguageFlag from '../components/getLanguageFlag';
-import { getOutgoingFriendReq, getRecommendationUsers, getUserFriends, sendFriendReq } from '../lib/api';
-import toast from 'react-hot-toast';
+import {
+  getOutgoingFriendReqs,
+  getRecommendedUsers,
+  getUserFriends,
+  sendFriendRequest,
+} from '../lib/api';
 
-const Homepage = () => {
+const Homepage = ({ currentUserId }) => {
+  const queryClient = useQueryClient();
+  const [outgoingRequestIDs, setOutgoingRequestIDs] = useState(new Set());
 
- const queryClient = useQueryClient();
- const[outgoingRequestIDs, setOutgoingRequestIDs] = useState(new Set());
+  const { data: friends = [], isLoading: loadingFriends } = useQuery({
+    queryKey: ['friends'],
+    queryFn: getUserFriends,
+  });
 
- const{data : friends=[],  isLoading : loadingFriends} = useQuery({
-  queryKey : ["friends"],
-  queryFn : getUserFriends
- });
+  const { data: recommendedFriends = [], isLoading: loadingUsers } = useQuery({
+    queryKey: ['users'],
+    queryFn: getRecommendedUsers,
+  });
 
- const{data : recommendedFriends=[], isLoading: loadingUsers} = useQuery({
-  queryKey : ["users"],
-  queryFn : getRecommendationUsers
- });
+  const { data: outgoingFriendReq } = useQuery({
+    queryKey: ['outgoingFriendReq'],
+    queryFn: getOutgoingFriendReqs,
+  });
 
- const{data : outgoingFriendReq} = useQuery({
-  queryKey : ["outgoingFriendReq"],
-  queryFn : getOutgoingFriendReq
- });
-
- const {mutate : sendFriendReqs , isPending } = useMutation({
-  mutationFn :sendFriendReq,
-  onSuccess: (data, id) => {
+  const { mutate: sendFriendReqs, isLoading: isSending } = useMutation({
+    mutationFn: sendFriendRequest,
+    onSuccess: (data, id) => {
       setOutgoingRequestIDs((prev) => new Set(prev).add(id));
-
       console.log('Friend request created:', data);
       toast.success('Friend request sent!');
       queryClient.invalidateQueries({ queryKey: ['outgoingFriendReq'] });
@@ -41,24 +45,28 @@ const Homepage = () => {
       console.log('Friend request not done:', err.message);
       toast.error('Failed to send request');
     },
+  });
 
- });
+  useEffect(() => {
 
- useEffect(() =>{
-  
-   const outGoingIds = new Set();
-  if(outgoingFriendReq && outgoingFriendReq.length > 0)
-  {
-    outgoingFriendReq.forEach((req) =>{
-      console.log(req); 
-      outGoingIds.add(req.recipient._id);
-    })
-    setOutgoingRequestIDs(outGoingIds);
+    
+    const outGoingIds = new Set();
+     if (outgoingFriendReq?.outgoingFriend?.length > 0) {
+    outgoingFriendReq.outgoingFriend.forEach((req) => {
+    
+      if (req.sender === currentUserId) {
+        // recipient field might be named differently, adjust if needed
+        outGoingIds.add(req.recipient?._id || req.recipientId);
+      }
+    });
   }
- },[outgoingFriendReq])
+    setOutgoingRequestIDs(outGoingIds);
+  }, [outgoingFriendReq, currentUserId]);
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="container mx-auto space-y-10">
+        {/* Friends Section */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Friends</h2>
           <Link to="/notifications" className="btn btn-outline btn-sm">
@@ -81,6 +89,7 @@ const Homepage = () => {
           </div>
         )}
 
+        {/* Recommendations Section */}
         <section>
           <div className="mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -97,7 +106,7 @@ const Homepage = () => {
             <div className="flex justify-center py-12">
               <span className="loading loading-spinner loading-lg" />
             </div>
-          ) :recommendedFriends.length === 0 ? (
+          ) : recommendedFriends.length === 0 ? (
             <div className="card bg-base-200 p-6 text-center">
               <h3 className="font-semibold text-lg mb-2">No recommendations available</h3>
               <p className="text-base-content opacity-70">
@@ -119,7 +128,6 @@ const Homepage = () => {
                         <div className="avatar size-16 rounded-full">
                           <img src={user.profilePic} alt={user.fullname} />
                         </div>
-
                         <div>
                           <h3 className="font-semibold text-lg">{user.fullname}</h3>
                           {user.location && (
@@ -144,13 +152,12 @@ const Homepage = () => {
 
                       {user.bio && <p className="text-sm opacity-70">{user.bio}</p>}
 
-                  
                       <button
                         className={`btn w-full mt-2 ${
-                          hasRequestBeenSent ? "btn-disabled" : "btn-primary"
-                        } `}
+                          hasRequestBeenSent ? 'btn-disabled' : 'btn-primary'
+                        }`}
                         onClick={() => sendFriendReqs(user._id)}
-                        disabled={hasRequestBeenSent || isPending}
+                        disabled={hasRequestBeenSent || isSending}
                       >
                         {hasRequestBeenSent ? (
                           <>
@@ -174,8 +181,8 @@ const Homepage = () => {
       </div>
     </div>
   );
-}
+};
 
-export default Homepage
+export default Homepage;
 
-const capitialize = (str)=> str.charAt(0).toUpperCase() + str.slice();
+const capitialize = (str) => str.charAt(0).toUpperCase() + str.slice();

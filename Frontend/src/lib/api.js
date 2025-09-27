@@ -1,5 +1,5 @@
 import { axiosInstance } from "./axios";
-import axios from "axios";
+
 
 export const getAuthUser = async()=>
       {
@@ -20,19 +20,34 @@ export async function getUserFriends() {
 
 };
 
-export async function getRecommendationUsers() {
+export async function getRecommendedUsers() {
   const response = await axiosInstance.get("/users/recommendation");
   return response.data;
 
 };
 
-export async function getOutgoingFriendReq() {
+export async function getOutgoingFriendReqs() {
   const response = await axiosInstance.get("/users/outgoing-friendRequest");
   return response.data;
 
 };
 
-export const sendFriendReq = async (id) => {
+export const sendFriendRequest = async (id) => {
   const { data } = await axiosInstance.post(`/users/friendRequest/${id}`);
   return data;
 };
+
+export const getFriendRequest = async () =>{
+  const {data} = await axiosInstance.get("/users/friendRequest")
+  return data;
+}
+
+export const acceptFriendRequest = async(requestID)=>{
+  const response = await axiosInstance.put(`/users/friendRequest/${requestID}/accept`)
+  return response.data;
+}
+
+export const getToken = async()=>{
+  const response = await axiosInstance.get("/chats/token");
+  return response.data;
+}

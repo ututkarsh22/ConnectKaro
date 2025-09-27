@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
     origin:"http://localhost:5173",
-    credentials:true  //this will allow frontend to send cookie
+    credentials : true  //this will allow frontend to send cookie
  }))
 
 app.use("/auth",authConnect);
