@@ -44,7 +44,7 @@ const CallPage = () => {
 
         const user = {
           id: authUser._id,
-          name: authUser.fullName,
+          name: authUser.fullname,
           image: authUser.profilePic,
         };
 
@@ -69,6 +69,7 @@ const CallPage = () => {
         setIsConnecting(false);
       }
     };
+  console.log("Token Data:", tokenData);
 
     initCall();
   }, [tokenData, authUser, callId]);

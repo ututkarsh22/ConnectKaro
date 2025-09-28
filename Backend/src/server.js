@@ -23,6 +23,7 @@ app.use(cors({
 
  }))
 
+ 
 app.use("/api/auth",authConnect);
 app.use("/api/users",userRoutes);
 app.use("/api/chats",chatRoutes);
