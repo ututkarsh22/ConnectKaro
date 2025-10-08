@@ -48,6 +48,11 @@ export const acceptFriendRequest = async(requestID)=>{
 }
 
 export const getToken = async()=>{
-  const response = await axiosInstance.get("/chats/token");
-  return response.data;
+  try {
+    const response = await axiosInstance.get("/chats/token");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch token:", error);
+    throw error; // re-throw if you want the caller to handle it
+  }
 }

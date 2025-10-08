@@ -4,7 +4,7 @@ export const getStreamToken = async (req, res) =>{
 
     try {
         
-        const token = generateStreamToken(req.user.id); 
+        const token = generateStreamToken(req.user._id); 
 
         res.status(201).json({token});
     } catch (error) {
