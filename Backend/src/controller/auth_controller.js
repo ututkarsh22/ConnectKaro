@@ -119,8 +119,8 @@ export async function Login(req,res){
     res.cookie("jwt",token ,{
         maxAge : 7*24*60*60*1000, //7 days
         httpOnly : true, //it helps to prevent XSS attack
-        sameSite : "strict",
-        secure : process.env.NODE_ENV === "production"
+        sameSite : "None",
+        secure : true
     })
 
     res.status(201).json({success:true, emailTrue})
