@@ -57,12 +57,12 @@ export async function Signup(req,res){
         expiresIn : "7d",
     }) //this is unique identifier asign to user so that it know which user have which unique token
 
-    res.cookie("jwt",token ,{
-        maxAge : 7*24*60*60*1000, //7 days
-        httpOnly : true, //it helps to prevent XSS attack
-        sameSite : "strict",
-        secure : process.env.NODE_ENV === "production"
-    })
+    res.cookie("jwt", token, {
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    httpOnly: true,
+    secure: true,        // Must be true for SameSite=None
+    sameSite: "None",    // Required for cross-site cookies
+});
 
     res.status(201).json({success:true, user : newUser}) //finally saved user
 }
@@ -78,8 +78,8 @@ export async function Logout(req,res){
         res.cookie("jwt","" ,{
         maxAge : 0, // clearing cookie
         httpOnly : true, //it helps to prevent XSS attack
-        sameSite : "strict",
-        secure : process.env.NODE_ENV === "production"
+        sameSite : "None",
+        secure : true
     });
 
      return res.status(200).json({ success: true, message: "Logged out successfully" });
