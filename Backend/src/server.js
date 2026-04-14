@@ -32,10 +32,14 @@ app.use("/api/auth", authConnect);
 app.use("/api/users", userRoutes);
 app.use("/api/chats", chatRoutes);
 
+
+console.log("NODE_ENV is:", process.env.NODE_ENV); // ← add this
+console.log("__dirname is:", __dirname);
 if (process.env.NODE_ENV === "production") {
 
     console.log("__dirname is:", __dirname);
     console.log("Serving dist from:", path.join(__dirname, "../../Frontend/dist"));
+
     app.use(express.static(path.join(__dirname, "../../Frontend/dist"))); // ✅ correct now
 
     app.get("*", (req, res) => {
